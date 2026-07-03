@@ -1,0 +1,51 @@
+---
+description: 工程实现约定（services/contracts/frontend 下写代码时强制应用），与《详细设计规范 V1》保持一致
+globs:
+  - "services/**"
+  - "contracts/**"
+  - "frontend/**"
+  - "platform-commons/**"
+alwaysApply: false
+---
+
+# 工程实现规则
+
+实现必须与对应服务的详细设计（`docs/detailed-design/`）一致；无详细设计的功能先出设计再写码。
+
+## 分层（DDD 六边形，Java 与 Rust 同构）
+
+- `interfaces/`（REST/gRPC/MQ 消费）→ `application/`（用例编排/事务边界）→ `domain/`（聚合/规则，**纯逻辑不依赖框架**）→ `infrastructure/`（PG/Redis/外部适配器/Outbox）。
+- 依赖方向只能向内；domain 不 import spring/axum/sqlx 等框架类型。
+- 跨域调用只走 `contracts/proto` 生成的 gRPC stub 或领域事件；**禁止直连他域数据库**。
+
+## 契约与领域模型
+
+- 域间接口先改 `contracts/proto/<domain>/v<n>/`，已发布字段编号禁改禁复用；Request 必带 `trace_id`。
+- 金额一律用 `Money`（Java: pension-domain-commons；Rust: rust_decimal；proto: common.v1.Money 字符串），禁止 double/float。
+- 风险等级用 `RiskLevel`(C1~C5)/`ProductRiskLevel`(R1~R5)；适当性判定用 `RiskLevel.accepts()` 语义。
+- 领域事件用 `DomainEvent` 信封，类型常量登记 `EventTypes`；消费方按 `eventId` 幂等。
+
+## 数据与一致性
+
+- PG：表/字段 snake_case；主键带前缀字符串 ID；必备 `created_at/updated_at`；金额 `numeric(18,2)`；PII 存 `_enc`（+`_hash` 查询列）；幂等键唯一约束落库；迁移用 Flyway `V<n>__desc.sql` 只前进。
+- 事务内禁止远程调用；写后发事件一律 Outbox；跨服务写用 Saga（补偿路径必须实现）。
+- 写接口幂等：Redis SETNX + PG 唯一约束双层；命中返回原结果。
+- 状态机单向：更新必须条件化 `WHERE status = :expected`，影响 0 行按并发冲突处理。
+- Redis key `pension:{domain}:{entity}:{id}` + 显式 TTL。
+
+## 错误与可观测
+
+- 错误码 `<域前缀>-<4|5><三位>`（目录见 docs/详细设计规范V1.md §6.2）；REST 失败返回统一 error 结构（code/message/traceId/details）。
+- 非幂等写禁止自动重试；只读/幂等写指数退避 ≤ 3 次。
+- 指标 `pension_<domain>_<subject>_<unit>`；日志结构化且脱敏（手机号/证件号打码）；`X-Trace-Id` 全链路透传。
+
+## 安全合规红线
+
+- 交易前适当性校验不可绕过（D5 调 D3 `Suitability.Check`，BLOCK 必须阻断）。
+- 关键交易/合规事件写 `AuditEvent` 留痕。
+- 大额（>5万）二次验证；禁止"保本/稳赚"类文案出现在代码常量/文案资源中。
+
+## 测试
+
+- domain 层规则分支覆盖 ≥ 80%；集成测试契约正例+反例（Testcontainers 起 PG/Redis）。
+- 资金/合规逻辑必须覆盖：幂等重复请求只成一单、部分失败补偿一致、风测过期阻断、超风险等级阻断。

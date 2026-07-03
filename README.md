@@ -9,6 +9,9 @@
   - `00_系统架构设计总览V1.md`（总体架构/统一领域模型/非功能/部署/关键流程）
   - `01`~`08` 各业务域模块设计（系统模块/组件/接口/分层/部署/进程）
 - 落地增强版（可开工）v1.1：`docs/pension-prd-executable-v1.1.md`
+- **详细设计规范 V1**：`docs/详细设计规范V1.md`（10 章结构/接口/数据/流程/错误码/一致性/安全/测试规范）
+  - 模板：`docs/detailed-design/_TEMPLATE_详细设计.md`；产出位置：`docs/detailed-design/<domain>/<service>_详细设计V<n>.md`
+  - AI 协作资产：skill `.cursor/skills/detailed-design/` + rules `.cursor/rules/`（写设计文档与写代码时自动应用）
 
 ## 工程目录结构（对应架构设计 00~08）
 
