@@ -1,0 +1,24 @@
+# API 网关路由规则（示例, 对应 docs/architecture/00 §2.4）
+# 链路: React -> BFF -> 网关 -> 域服务; 鉴权 OAuth2+JWT, 限流双层
+routes:
+  - id: marketing
+    uri: lb://tax-calc-svc
+    predicates: [ "Path=/api/v1/marketing/**" ]
+  - id: user
+    uri: lb://user-service
+    predicates: [ "Path=/api/v1/users/**" ]
+  - id: pension-account
+    uri: lb://pension-account-service
+    predicates: [ "Path=/api/v1/pension-accounts/**" ]
+  - id: advisor
+    uri: lb://risk-svc
+    predicates: [ "Path=/api/v1/advisor/**" ]
+  - id: product
+    uri: lb://catalog-svc
+    predicates: [ "Path=/api/v1/products/**" ]
+  - id: trade
+    uri: lb://trade-svc
+    predicates: [ "Path=/api/v1/trades/**" ]
+  - id: content
+    uri: lb://knowledge-svc
+    predicates: [ "Path=/api/v1/content/**" ]

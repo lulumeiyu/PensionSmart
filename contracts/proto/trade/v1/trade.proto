@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package pensionsmart.trade.v1;
+
+import "common/v1/common.proto";
+
+option java_package = "com.pensionsmart.contracts.trade.v1";
+option java_multiple_files = true;
+
+// D5 trade-svc 对内: 组合申购 (BFF 经网关 REST 转入; 域间走本 gRPC)
+// 幂等: idempotency_key + 请求摘要, 24h 窗口; 错误码 TR-4091/TR-4221/TR-5031 (v1.1 §4.2)
+service Trade {
+  rpc PlacePortfolioOrder(PlacePortfolioOrderRequest) returns (PlacePortfolioOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+}
+
+message PlacePortfolioOrderRequest {
+  string user_id = 1;
+  string plan_id = 2;
+  pensionsmart.common.v1.Money total_amount = 3;
+  string idempotency_key = 4;
+  string trace_id = 5;
+}
+
+message PlacePortfolioOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  repeated SubOrder sub_orders = 3;
+
+  message SubOrder {
+    string sub_order_id = 1;
+    string product_id = 2;
+    pensionsmart.common.v1.Money amount = 3;
+  }
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+  string trace_id = 2;
+}
+
+message GetOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+}
+
+// 单向状态机 (docs/architecture/05 §6.2)
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_INIT = 1;
+  ORDER_STATUS_PENDING_CONFIRM = 2;
+  ORDER_STATUS_PROCESSING = 3;
+  ORDER_STATUS_SUCCEEDED = 4;
+  ORDER_STATUS_FAILED = 5;
+  ORDER_STATUS_ROLLED_BACK = 6;
+}

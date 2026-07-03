@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.pensionsmart</groupId>
+  <artifactId>marketing-module</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>D1 营销获客域 (marketing-module)</name>
+  <modules>
+    <module>profile-svc</module>
+    <module>reach-svc</module>
+    <module>journey-svc</module>
+    <module>abtest-svc</module>
+    <module>tax-calc-svc</module>
+    <module>referral-svc</module>
+  </modules>
+</project>

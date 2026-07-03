@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package pensionsmart.advisor.v1;
+
+import "common/v1/common.proto";
+
+option java_package = "com.pensionsmart.contracts.advisor.v1";
+option java_multiple_files = true;
+
+// D3 risk-svc 对外: 适当性校验 (控制依赖, 被 D5 交易调用)
+// 只判定不阻断; 阻断动作由调用方(D5)执行 —— 职责分解 V1 §十
+service Suitability {
+  rpc Check(SuitabilityCheckRequest) returns (SuitabilityCheckResponse);
+}
+
+message SuitabilityCheckRequest {
+  string user_id = 1;
+  repeated string product_ids = 2;
+  string trace_id = 3;
+}
+
+message SuitabilityCheckResponse {
+  Decision decision = 1;
+  pensionsmart.common.v1.RiskLevel user_risk_level = 2;
+  repeated ProductDecision products = 3;
+  string assessment_id = 4;   // 用于审计留痕 (D3.1-F7)
+
+  enum Decision {
+    DECISION_UNSPECIFIED = 0;
+    DECISION_PASS = 1;              // 全部匹配
+    DECISION_BLOCK_MISMATCH = 2;    // 产品风险超限, 需阻断 (C4/C5 可确认突破)
+    DECISION_BLOCK_EXPIRED = 3;     // 测评过期, 需重测
+  }
+
+  message ProductDecision {
+    string product_id = 1;
+    pensionsmart.common.v1.ProductRiskLevel product_risk_level = 2;
+    bool matched = 3;
+  }
+}

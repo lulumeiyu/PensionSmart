@@ -1,0 +1,45 @@
+# 本地开发中间件 (docs/architecture/00 §1.2 技术栈基线)
+# 用法: docker compose -f infra/deploy/docker-compose.yml up -d
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: pension
+      POSTGRES_PASSWORD: pension_dev
+      POSTGRES_DB: pension
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    ports: ["8123:8123", "9000:9000"]
+
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    environment:
+      MODE: standalone
+    ports: ["8848:8848"]
+
+  kafka:
+    image: bitnami/kafka:3.7
+    environment:
+      KAFKA_CFG_NODE_ID: "0"
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports: ["9092:9092"]
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.2.0
+    command: sh mqnamesrv
+    ports: ["9876:9876"]
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.2.0
+    command: sh mqbroker -n rocketmq-namesrv:9876
+    depends_on: [rocketmq-namesrv]
+    ports: ["10911:10911"]

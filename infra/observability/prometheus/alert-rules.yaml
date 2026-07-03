@@ -1,0 +1,12 @@
+# 告警规则（示例）: P0 资金类告警自动暂停新增交易入口 (v1.1 §10.1)
+groups:
+  - name: trade-p0
+    rules:
+      - alert: ReconFundDiff
+        expr: recon_fund_diff_total > 0
+        labels: { severity: P0 }
+        annotations: { summary: "对账资金差异, 自动建 P0 工单并暂停新增交易入口" }
+      - alert: PortfolioOrderAtomicityBroken
+        expr: portfolio_order_partial_state_total > 0
+        labels: { severity: P0 }
+        annotations: { summary: "组合申购原子性异常(部分成功滞留)" }

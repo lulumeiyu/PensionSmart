@@ -1,0 +1,6 @@
+# bff-gateway 域部署清单 (kustomize)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bff-gateway
+resources: []
+# TODO: 添加各服务 Deployment/Service/HPA

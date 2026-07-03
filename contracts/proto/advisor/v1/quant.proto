@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package pensionsmart.advisor.v1;
+
+option java_package = "com.pensionsmart.contracts.advisor.v1";
+option java_multiple_files = true;
+
+// D3 quant-compute (Python) 对内: 重数值计算
+// 调用方: allocation-svc / rebalance-svc; 超时降级到静态 TRF 权重
+service Quant {
+  rpc Optimize(OptimizeRequest) returns (OptimizeResponse);
+  rpc Backtest(BacktestRequest) returns (BacktestResponse);
+}
+
+message OptimizeRequest {
+  string strategy = 1;             // TRF / TDF / MVO / BL
+  string risk_level = 2;           // C1~C5
+  int32 retirement_year = 3;       // TDF 用
+  repeated string asset_classes = 4;
+  map<string, string> constraints = 5; // 如 max_single_weight=0.30
+  string trace_id = 6;
+}
+
+message OptimizeResponse {
+  repeated AssetWeight weights = 1;
+  string method_version = 2;
+
+  message AssetWeight {
+    string asset_class = 1;
+    string weight = 2; // 高精度字符串 "0.4000"
+  }
+}
+
+message BacktestRequest {
+  repeated ProductWeight portfolio = 1;
+  string start_date = 2; // YYYY-MM-DD
+  string end_date = 3;
+  string trace_id = 4;
+
+  message ProductWeight {
+    string product_id = 1;
+    string weight = 2;
+  }
+}
+
+message BacktestResponse {
+  string annualized_return = 1;
+  string max_drawdown = 2;
+  string sharpe = 3;
+  repeated CurvePoint curve = 4;
+
+  message CurvePoint {
+    string date = 1;
+    string nav = 2;
+  }
+}

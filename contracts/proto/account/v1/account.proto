@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package pensionsmart.account.v1;
+
+import "common/v1/common.proto";
+
+option java_package = "com.pensionsmart.contracts.account.v1";
+option java_multiple_files = true;
+
+// D2 pension-account-service 对外: 额度/余额 (控制依赖, 被 D5 交易调用)
+// CheckQuota 只判定, 拦截动作由调用方(D5)执行 —— 职责分解 V1 D2.2-F4/F5
+service Account {
+  rpc CheckQuota(CheckQuotaRequest) returns (CheckQuotaResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+}
+
+message CheckQuotaRequest {
+  string user_id = 1;
+  pensionsmart.common.v1.Money amount = 2; // 本次拟缴金额
+  string trace_id = 3;
+}
+
+message CheckQuotaResponse {
+  bool allowed = 1;
+  pensionsmart.common.v1.Money annual_quota = 2;  // 12000.00
+  pensionsmart.common.v1.Money used = 3;
+  pensionsmart.common.v1.Money remaining = 4;
+}
+
+message GetBalanceRequest {
+  string user_id = 1;
+  string trace_id = 2;
+}
+
+message GetBalanceResponse {
+  string account_id = 1;
+  pensionsmart.common.v1.Money balance = 2;
+  string status = 3; // NORMAL / FROZEN / CLOSED
+}

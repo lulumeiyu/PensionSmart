@@ -1,0 +1,20 @@
+[package]
+name = "sip-svc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "智能定投: 定额/不定额/目标定投、计划管理、失败重试"
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+sqlx = { workspace = true }
+rust_decimal = { workspace = true }
+redis = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package pensionsmart.common.v1;
+
+option java_package = "com.pensionsmart.contracts.common.v1";
+option java_multiple_files = true;
+
+// 统一领域原语 - 跨语言契约源 (docs/architecture/00 §3.1)
+// Java: platform-commons/pension-domain-commons; Rust/Python: 由本文件生成
+
+// 金额: 高精度字符串表示, 禁用浮点 (Decimal 18,2)
+message Money {
+  string amount = 1;   // "12000.00"
+  string currency = 2; // "CNY"
+}
+
+// 用户风险等级 C1~C5
+enum RiskLevel {
+  RISK_LEVEL_UNSPECIFIED = 0;
+  RISK_LEVEL_C1 = 1; // 保守
+  RISK_LEVEL_C2 = 2; // 稳健
+  RISK_LEVEL_C3 = 3; // 平衡
+  RISK_LEVEL_C4 = 4; // 积极
+  RISK_LEVEL_C5 = 5; // 进取
+}
+
+// 产品风险等级 R1~R5
+enum ProductRiskLevel {
+  PRODUCT_RISK_LEVEL_UNSPECIFIED = 0;
+  PRODUCT_RISK_LEVEL_R1 = 1;
+  PRODUCT_RISK_LEVEL_R2 = 2;
+  PRODUCT_RISK_LEVEL_R3 = 3;
+  PRODUCT_RISK_LEVEL_R4 = 4;
+  PRODUCT_RISK_LEVEL_R5 = 5;
+}
+
+// 领域事件统一信封 (docs/architecture/00 §3.2)
+message DomainEventEnvelope {
+  string event_id = 1;    // evt_xxx
+  string event_type = 2;  // 如 trade.FirstPurchaseCompleted (见 events/v1)
+  string occurred_at = 3; // RFC3339
+  string source = 4;      // 生产者模块
+  string trace_id = 5;    // 全链路追踪
+  string version = 6;     // 契约版本
+  bytes payload = 7;      // JSON 业务载荷
+}

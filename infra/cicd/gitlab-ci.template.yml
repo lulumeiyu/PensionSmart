@@ -1,0 +1,22 @@
+# CI 流水线模板 (S2.5-F1/F2)
+stages: [test, build, image]
+
+java-test:
+  stage: test
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - mvn -f platform-commons/pension-domain-commons/pom.xml install -q
+    - for d in marketing user advisor product content; do mvn -f services/$d/pom.xml test -q; done
+
+rust-test:
+  stage: test
+  image: rust:1.79
+  script:
+    - cargo test --workspace --manifest-path services/trade/Cargo.toml
+
+frontend-build:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend/web-app && npm ci && npm run build
+    - cd ../bff && npm ci && npm run build

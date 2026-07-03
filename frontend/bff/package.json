@@ -1,0 +1,23 @@
+{
+  "name": "pensionsmart-bff",
+  "private": true,
+  "version": "0.1.0",
+  "description": "BFF 聚合层 (NestJS): 面向端的数据聚合/裁剪, 前端唯一入口, 经 API 网关调用各域 (docs/architecture/00 §2.2)",
+  "scripts": {
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.9",
+    "@nestjs/core": "^10.3.9",
+    "@nestjs/platform-express": "^10.3.9",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.3.2",
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.3"
+  }
+}

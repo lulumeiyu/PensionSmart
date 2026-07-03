@@ -1,4 +1,4 @@
-# PensionSmart
+# PensionSmart · 个人养老金智能投顾平台
 
 ## Requirements Docs
 
@@ -9,3 +9,51 @@
   - `00_系统架构设计总览V1.md`（总体架构/统一领域模型/非功能/部署/关键流程）
   - `01`~`08` 各业务域模块设计（系统模块/组件/接口/分层/部署/进程）
 - 落地增强版（可开工）v1.1：`docs/pension-prd-executable-v1.1.md`
+
+## 工程目录结构（对应架构设计 00~08）
+
+```
+.
+├─ contracts/                    # 跨语言契约源 (Protobuf): common/advisor/account/product/trade
+├─ frontend/                     # 前后端分离
+│  ├─ web-app/                   #   React 18 + TS + Vite (Web/H5, src/features 按业务域组织)
+│  └─ bff/                       #   NestJS BFF 聚合层 (前端唯一入口, 端口 3100)
+├─ platform-commons/
+│  └─ pension-domain-commons/    # 统一领域模型 Shared Kernel (Money/RiskLevel/DomainEvent/AuditEvent)
+├─ services/                     # 业务域 = 独立系统模块
+│  ├─ marketing/                 # D1 营销获客域 (Java, 8111~8116): profile/reach/journey/abtest/tax-calc/referral
+│  ├─ user/                      # D2 用户管理域 (Java, 8121~8125, 强合规区): user/pension-account/member/message/preference
+│  ├─ advisor/                   # D3 投顾引擎域 (Java, 8131~8135): risk/allocation/recommend/rebalance/behavior
+│  │  └─ quant-compute/          #   Python 量化计算 gRPC (9136): MVO/BL/回测/压测/蒙特卡洛
+│  ├─ product/                   # D4 产品中心域 (Java, 8141~8146): ingest/catalog/detail/compare/ai-interpret/rating
+│  ├─ trade/                     # D5 交易结算域 (Rust workspace, 8151~8156, 强合规区):
+│  │                             #   trade/redeem/sip/convert/settlement-recon/trade-risk
+│  └─ content/                   # D6 内容教育域 (Java, 8161~8165): knowledge/simulator/cms/learning/activity
+├─ data-platform/                # S1 数据中台域: collect / realtime-flink / offline-spark / warehouse-clickhouse / governance
+├─ infra/                        # S2 基础平台域
+│  ├─ gateway/                   #   API 网关路由 (鉴权/限流/路由)
+│  ├─ config/                    #   Nacos 配置中心
+│  ├─ observability/             #   Prometheus/Grafana/ELK/SkyWalking (含 P0 资金告警规则)
+│  ├─ security/                  #   KMS/AML/审计 (强合规区)
+│  ├─ cicd/                      #   流水线模板
+│  └─ deploy/                    #   docker-compose(本地) / k8s(命名空间+网络策略+kustomize) / argocd
+├─ docs/                         # 需求与架构文档
+└─ Makefile                      # dev-up / build-commons / build-java / build-trade / build-frontend / proto-lint
+```
+
+### 约定
+
+- **每个 Java 服务**统一 DDD 六边形分层：`interfaces / application / domain / infrastructure`（Rust 同构，为 `src/*.rs` 模块）。
+- **域间通信**：同步 gRPC（契约在 `contracts/proto`）、异步 RocketMQ 领域事件（类型登记于 `EventTypes`）、数据管道 Kafka → ClickHouse。
+- **强合规隔离区**：`user`、`trade`、`infra/security` 部署于独立节点池/VPC（`infra/deploy/k8s/namespaces.yaml` 中 `zone: secure`）。
+- **本地开发**：`make dev-up` 启动 PG/Redis/ClickHouse/Nacos/Kafka/RocketMQ。
+
+## 快速开始
+
+```bash
+make dev-up            # 本地中间件
+make build-commons     # 统一领域模型 jar
+make build-java        # D1/D2/D3/D4/D6 Java 服务
+make build-trade       # D5 Rust 交易域
+make build-frontend    # React + BFF
+```

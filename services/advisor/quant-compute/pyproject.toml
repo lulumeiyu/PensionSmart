@@ -1,0 +1,23 @@
+[project]
+name = "quant-compute"
+version = "0.1.0"
+description = "D3 投顾引擎域 · 量化计算服务: MVO/Black-Litterman/回测/压力测试/蒙特卡洛 (gRPC)"
+requires-python = ">=3.11"
+dependencies = [
+    "grpcio>=1.62",
+    "grpcio-tools>=1.62",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "cvxpy>=1.4",
+    "clickhouse-connect>=0.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.4"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package pensionsmart.product.v1;
+
+import "common/v1/common.proto";
+
+option java_package = "com.pensionsmart.contracts.product.v1";
+option java_multiple_files = true;
+
+// D4 product-module 对外: 供 D3(候选产品)/D5(下单校验) 调用
+service Product {
+  rpc QueryCandidates(QueryCandidatesRequest) returns (QueryCandidatesResponse);
+  rpc GetForTrade(GetForTradeRequest) returns (GetForTradeResponse);
+  rpc BatchGetNav(BatchGetNavRequest) returns (BatchGetNavResponse);
+}
+
+message QueryCandidatesRequest {
+  string asset_class = 1;                                     // 大类
+  pensionsmart.common.v1.ProductRiskLevel max_risk_level = 2; // 风险上限
+  int32 limit = 3;
+  string trace_id = 4;
+}
+
+message QueryCandidatesResponse {
+  repeated Candidate candidates = 1;
+
+  message Candidate {
+    string product_id = 1;
+    string name = 2;
+    string product_type = 3; // FUND / WEALTH / INSURANCE / DEPOSIT
+    pensionsmart.common.v1.ProductRiskLevel risk_level = 4;
+    string latest_nav = 5;
+    string fee_rate = 6;
+  }
+}
+
+message GetForTradeRequest {
+  repeated string product_ids = 1;
+  string trace_id = 2;
+}
+
+message GetForTradeResponse {
+  repeated TradableProduct products = 1;
+
+  message TradableProduct {
+    string product_id = 1;
+    bool on_shelf = 2;
+    pensionsmart.common.v1.ProductRiskLevel risk_level = 3;
+    string fee_rate = 4;
+    pensionsmart.common.v1.Money min_purchase = 5;
+  }
+}
+
+message BatchGetNavRequest {
+  repeated string product_ids = 1;
+  string date = 2; // 空则最新
+  string trace_id = 3;
+}
+
+message BatchGetNavResponse {
+  map<string, string> navs = 1; // product_id -> nav
+}

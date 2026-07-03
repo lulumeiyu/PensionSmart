@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: recommend-svc
+  # Nacos/Redis/PG 等运行时配置经配置中心下发 (S2.2)
+  # 本地开发中间件见 infra/deploy/docker-compose.yml
+
+server:
+  port: 8133

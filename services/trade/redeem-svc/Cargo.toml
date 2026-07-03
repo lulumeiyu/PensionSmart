@@ -1,0 +1,20 @@
+[package]
+name = "redeem-svc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "赎回交易: 部分/全部赎回、到账预估、冷静期、状态"
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+sqlx = { workspace = true }
+rust_decimal = { workspace = true }
+redis = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }

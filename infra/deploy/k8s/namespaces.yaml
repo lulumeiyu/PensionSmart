@@ -1,0 +1,55 @@
+# 命名空间按域隔离 + 节点池标签 (docs/architecture/00 §5)
+# 通用区: node-pool-general | 强合规区: node-pool-secure(独立VPC) | 数据区: node-pool-data
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: marketing
+  labels: { domain: d1, zone: general }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: user-account
+  labels: { domain: d2, zone: secure }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: advisor
+  labels: { domain: d3, zone: general }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: product
+  labels: { domain: d4, zone: general }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trade
+  labels: { domain: d5, zone: secure }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: content
+  labels: { domain: d6, zone: general }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data-platform
+  labels: { domain: s1, zone: data }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: security-aml
+  labels: { domain: s2, zone: secure }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bff-gateway
+  labels: { domain: s2, zone: general }
